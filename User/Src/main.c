@@ -1,4 +1,5 @@
-/**
+
+**
  ******************************************************************************
  * @file           : main.c
  * @brief          : Main program body
@@ -37,6 +38,8 @@ void SysTick_Handler(void)
 	HAL_IncTick();
 }
 
+
+
 /**
  * @brief  The application entry point.
  * @retval int
@@ -74,6 +77,23 @@ int main(void)
 
 	int cnt = 0;
 	/* Infinite loop */
+
+
+	GPIO_InitTypeDef pa0;
+
+    pa0.Mode = GPIO_MODE_IT_RISING;
+    pa0.Alternate = 0;
+    pa0.Pin = GPIO_PIN_0;
+    pa0.Pull = GPIO_NOPULL;
+    pa0.Speed = GPIO_SPEED_MEDIUM;
+
+	HAL_GPIO_Init(GPIOA,&pa0);
+
+
+
+
+
+	HAL_NVIC_EnableIRQ()
 	while (1)
 	{
 		//execute main loop every 100ms
