@@ -1,13 +1,13 @@
 
-**
- ******************************************************************************
- * @file           : main.c
- * @brief          : Main program body
- ******************************************************************************
- * Description of project
- *
- ******************************************************************************
- */
+/**
+******************************************************************************
+* @file           : main.c
+* @brief          : Main program body
+******************************************************************************
+* Description of project
+*
+******************************************************************************
+*/
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdio.h>
@@ -25,7 +25,7 @@
 /* Private define ------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-
+static volatile int it;
 /* Private function prototypes -----------------------------------------------*/
 static int GetUserButtonPressed(void);
 static int GetTouchState (int *xCoord, int *yCoord);
@@ -38,8 +38,15 @@ void SysTick_Handler(void)
 	HAL_IncTick();
 }
 
+void EXTI0_IRQHandler(void){
+	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_0);
+	it++;
+}
 
+void EXTI2_IRQHAndler(void){
+	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_2);
 
+}
 /**
  * @brief  The application entry point.
  * @retval int
@@ -73,38 +80,64 @@ int main(void)
 
 	LCD_SetFont(&Font8);
 	LCD_SetColors(LCD_COLOR_MAGENTA, LCD_COLOR_BLACK); // TextColor, BackColor
-	LCD_DisplayStringAtLineMode(39, "copyright xyz", CENTER_MODE);
+	LCD_DisplayStringAtLineMode(39, "copyright Omerovic.Env", CENTER_MODE);
 
 	int cnt = 0;
 	/* Infinite loop */
 
 
 	GPIO_InitTypeDef pa0;
+	GPIO_InitTypeDef pg2;
 
-    pa0.Mode = GPIO_MODE_IT_RISING;
-    pa0.Alternate = 0;
-    pa0.Pin = GPIO_PIN_0;
-    pa0.Pull = GPIO_NOPULL;
-    pa0.Speed = GPIO_SPEED_MEDIUM;
+	pa0.Mode = GPIO_MODE_IT_RISING;
+	pa0.Alternate = 0;
+	pa0.Pin = GPIO_PIN_0;
+	pa0.Pull = GPIO_NOPULL;
+	pa0.Speed = GPIO_SPEED_MEDIUM;
+
+	pg2.Mode = GPIO_MODE_IT_RISING;
+	pg2.Alternate = 0;
+	pg2.Pin = GPIO_PIN_2;
+	pg2.Pull = GPIO_PULLUP;
+	pg2.Speed = GPIO_SPEED_MEDIUM;
+
 
 	HAL_GPIO_Init(GPIOA,&pa0);
+    HAL_GPIO_Init(GPIOG,&pg2);
+
+	HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+    HAL_NVIC_EnableIRQ(EXTI2_IRQn);
 
 
 
 
+	int cnt_oben = 0;
+	int cnt_unten = 0;
 
-	HAL_NVIC_EnableIRQ()
 	while (1)
 	{
 		//execute main loop every 100ms
 		HAL_Delay(100);
 
-		// display timer
-		cnt++;
+		if(it %2 == 0){
+			cnt_oben++;
+
+		}
+
+		if(it %2 == 1){
+			cnt_unten++;
+		}
+
 		LCD_SetFont(&Font20);
 		LCD_SetTextColor(LCD_COLOR_BLUE);
 		LCD_SetPrintPosition(5, 0);
-		printf("   Timer: %.1f", cnt/10.0);
+		printf(" Timer: %.1f",cnt_oben/10.0);
+
+		LCD_SetFont(&Font20);
+		LCD_SetTextColor(LCD_COLOR_BLUE);
+		LCD_SetPrintPosition(6, 0);
+		printf(" Timer: %.1f",cnt_unten/10.0);
+
 
 		// test touch interface
 		int x, y;
@@ -113,7 +146,15 @@ int main(void)
 		}
 
 
+
 	}
+
+
+
+
+
+
+
 }
 
 /**
