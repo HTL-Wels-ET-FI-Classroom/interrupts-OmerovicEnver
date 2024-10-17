@@ -89,7 +89,7 @@ int main(void)
 	LCD_SetBackColor(LCD_COLOR_BLACK);
 	LCD_SetFont(&Font20);
 	// There are 2 ways to print text to screen: using printf or LCD_* functions
-	LCD_DisplayStringAtLine(0, "    HTL Wels");
+	LCD_DisplayStringAtLine(0, "  EXTI Interrupt");
 	// printf Alternative
 	LCD_SetPrintPosition(1, 0);
 	printf(" Fischergasse 30");
