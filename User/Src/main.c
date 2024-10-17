@@ -1,13 +1,13 @@
 
 /**
-******************************************************************************
-* @file           : main.c
-* @brief          : Main program body
-******************************************************************************
-* Description of project
-*
-******************************************************************************
-*/
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * Description of project
+ *
+ ******************************************************************************
+ */
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdio.h>
@@ -25,7 +25,11 @@
 /* Private define ------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static volatile int it;
+static volatile int it = 0;
+static volatile int cnt_oben = 0;
+static volatile int cnt_unten = 0;
+
+static volatile int timerfarbestate = 1;
 /* Private function prototypes -----------------------------------------------*/
 static int GetUserButtonPressed(void);
 static int GetTouchState (int *xCoord, int *yCoord);
@@ -36,16 +40,30 @@ static int GetTouchState (int *xCoord, int *yCoord);
 void SysTick_Handler(void)
 {
 	HAL_IncTick();
+	if(it %2 == 0){
+		cnt_oben++;
+
+	}
+
+	if(it %2 == 1){
+		cnt_unten++;
+	}
 }
 
 void EXTI0_IRQHandler(void){
 	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_0);
 	it++;
+
 }
 
-void EXTI2_IRQHAndler(void){
+void EXTI2_IRQHandler(void){
 	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_2);
 
+	if(timerfarbestate == 1){
+		timerfarbestate = 2;
+	}else if(timerfarbestate == 2){
+		timerfarbestate = 1;
+	}
 }
 /**
  * @brief  The application entry point.
@@ -103,40 +121,37 @@ int main(void)
 
 
 	HAL_GPIO_Init(GPIOA,&pa0);
-    HAL_GPIO_Init(GPIOG,&pg2);
+	HAL_GPIO_Init(GPIOG,&pg2);
 
 	HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-    HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+	HAL_NVIC_EnableIRQ(EXTI2_IRQn);
 
 
 
 
-	int cnt_oben = 0;
-	int cnt_unten = 0;
-
+	int timerfarbe = LCD_COLOR_BLUE;
 	while (1)
 	{
 		//execute main loop every 100ms
-		HAL_Delay(100);
 
-		if(it %2 == 0){
-			cnt_oben++;
 
-		}
 
-		if(it %2 == 1){
-			cnt_unten++;
-		}
 
 		LCD_SetFont(&Font20);
-		LCD_SetTextColor(LCD_COLOR_BLUE);
+		LCD_SetTextColor(timerfarbe);
 		LCD_SetPrintPosition(5, 0);
-		printf(" Timer: %.1f",cnt_oben/10.0);
+		printf(" Timer: %.1f",cnt_oben/1000.0);
 
 		LCD_SetFont(&Font20);
-		LCD_SetTextColor(LCD_COLOR_BLUE);
+		LCD_SetTextColor(timerfarbe);
 		LCD_SetPrintPosition(6, 0);
-		printf(" Timer: %.1f",cnt_unten/10.0);
+		printf(" Timer: %.1f",cnt_unten/1000.0);
+
+		if(timerfarbestate == 1){
+			timerfarbe = LCD_COLOR_BLUE;
+		}else if(timerfarbestate == 2){
+			timerfarbe = LCD_COLOR_GREEN;
+		}
 
 
 		// test touch interface
